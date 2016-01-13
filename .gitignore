@@ -27,6 +27,7 @@
 
 # Windows image file caches  
 Thumbs.db  
+*.cbp
 
 # Folder config file  
 Desktop.ini
