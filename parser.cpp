@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <regex>
 
 struct command_str {
     string name;
@@ -71,36 +72,64 @@ class Parser {
 
     static void parse_cmd(char* cmd, command_str &myCmd)
     {
-        cmd = skipwhite(cmd);
-        char* next = strchr(cmd, ' ');
-        int i = 0;
+        string cmdStr(cmd);
+        std::regex quotationReg("(sub)(.*)");
+        if (std::regex_match (cmdStr,quotationReg)){
+            cmdStr = trimWhiteFromBegin(cmdStr);
+            myCmd.args.push_back(string(cmdStr.c_str()));
+        }else{
+            cmd = skipwhite(cmd);
+            char* next = strchr(cmd, ' ');
+            int i = 0;
 
-        while(next != NULL) {
-            next[0] = '\0';
-            //args[i] = cmd;
-            if(i == 0)
-                myCmd.name = string(cmd);
-            else
-               parse_parameter(cmd, myCmd);
-            ++i;
-            cmd = skipwhite(next + 1);
-            next = strchr(cmd, ' ');
-        }
+            while(next != NULL) {
+                next[0] = '\0';
+                //args[i] = cmd;
+                if(i == 0)
+                    myCmd.name = string(cmd);
+                else
+                   parse_parameter(cmd, myCmd);
+                ++i;
+                cmd = skipwhite(next + 1);
+                next = strchr(cmd, ' ');
+            }
 
-        if (cmd[0] != '\0') {
-            //args[i] = cmd;
-            next = strchr(cmd, '\n');
-            next[0] = '\0';
-            if(i == 0)
-                myCmd.name = string(cmd);
-            else
-                parse_parameter(cmd, myCmd);
-            ++i;
+            if (cmd[0] != '\0') {
+                //args[i] = cmd;
+                next = strchr(cmd, '\n');
+                next[0] = '\0';
+                if(i == 0)
+                    myCmd.name = string(cmd);
+                else
+                    parse_parameter(cmd, myCmd);
+                ++i;
+            }
         }
         //args[i] = NULL;
     }
 
-    static void parse_parameter(char *cmd, command_str &myCmd){
-         myCmd.args.push_back(string(cmd));
+    static void parse_parameter(char *cmdPar, command_str &myCmd){
+        string cmd(cmdPar);
+        std::regex quotationReg("(sub)(.*)");
+        if (std::regex_match (cmd,quotationReg))
+            myCmd.args.push_back(string(cmd.c_str()));
+        else
+            myCmd.args.push_back(string(cmd.c_str()));
+    }
+
+    static string trimWhiteFromBegin(string str)
+    {
+        int i = 0;
+        for (char c : str)
+        {
+            if (!isspace(c))
+                break;
+            i++;
+        }
+
+        string trimmed = str.substr(i, (str.length()-i));
+
+        return trimmed;
+
     }
 };
