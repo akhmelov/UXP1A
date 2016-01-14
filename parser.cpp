@@ -4,7 +4,8 @@
 
 class Parser {
     public:
-    static vector<command_str> parse(char line[1024], vector<command_str> &commands){
+    static vector<command_str> parse(char line[1024], comm_str &comm){
+        vector<command_str> & commands = comm.commands;
         char* cmd = line;
 		char* next = strchr(cmd, '|'); /* Find first '|' */
         while (next != NULL){

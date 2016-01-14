@@ -8,7 +8,8 @@ class MyExecutor{
 
     public:
 
-        static void run(vector<command_str> &commands){
+        static void run(comm_str &comm){
+            vector<command_str> & commands = comm.commands;
             int n = 0; //how many process are running
 
             int input = 0;

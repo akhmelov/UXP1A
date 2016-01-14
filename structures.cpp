@@ -1,11 +1,13 @@
-
-
 struct command_str {
-    string name;
-    vector<string> args;
-    pair<int, string> we;
-    pair<int, string> wy;
-    bool isBackground;
+    string name; // command name
+    vector<string> args; // command args
+    /* for we and wy
+     * int = -1 -> pipe
+     * int = -2 -> redirect
+     * int > 0  -> filename in string
+     */
+    vector<pair<int, string>> we;
+    vector<pair<int, string>> wy;
 
     command_str(){};
     command_str(const command_str &a){
@@ -13,13 +15,12 @@ struct command_str {
         this->args = a.args;
         this->we = a.we;
         this->wy = a.wy;
-        this->isBackground = a.isBackground;
     }
-    /*command(string name, vector<string> args, pair<int, string> we, pair<int, string> wy, bool isBackground = false){
-        this->name = name;
-        this->args = args;
-        this->we = we;
-        this->wy = wy;
-        this->isBackground = isBackground;
-    }*/
+};
+
+struct comm_str {
+    vector<command_str> commands;
+    vector<string> redirected;
+    bool isBackground;
+    int retValue;
 };

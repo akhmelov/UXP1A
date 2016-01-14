@@ -3,7 +3,8 @@
 
 class Help_class {
     public:
-        static void print_command_vector(vector<command_str> &commands){
+        static void print_command_vector(comm_str &comm){
+            vector<command_str> & commands = comm.commands;
 
             std::cout.flush();
             int size1 = commands.size();

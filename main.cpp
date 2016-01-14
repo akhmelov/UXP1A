@@ -24,7 +24,7 @@ using namespace std;
 
 #include "help_functions.cpp"
 
-int main()
+int main(int argc, char ** argv)
 {
     static char line[1024];
 
@@ -40,15 +40,16 @@ int main()
 		fflush(NULL);
 
 		/* Read a command line */
-		if (!fgets(line, 1024, stdin))
+        if ( argc > 1) strcpy(line,argv[1]);
+		else if (!fgets(line, 1024, stdin))
 			return 0;
 
-        vector<command_str> commands;
-        Parser::parse(line, commands);
+        comm_str comm;
+        Parser::parse(line, comm);
 
-        MyExecutor::run(commands);
+        MyExecutor::run(comm);
 
-        Help_class::print_command_vector(commands);
+        Help_class::print_command_vector(comm);
 	}
 	return 0;
 }
