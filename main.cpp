@@ -6,6 +6,10 @@
 #include <ctype.h>
 #include <unistd.h>
 
+#include <iostream>
+#include <vector>
+#include <regex>
+
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -14,6 +18,7 @@ using namespace std;
 #define READ  0
 #define WRITE 1
 
+#include "structures.cpp"
 #include "parser.cpp"
 #include "executor.cpp"
 
