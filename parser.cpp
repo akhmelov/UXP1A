@@ -186,7 +186,7 @@ class Parser {
         static vector<tokenS> getTokens(string cmd){
             cmd.erase(std::remove(cmd.begin(), cmd.end(), '\n'), cmd.end());
             vector<tokenS> tokens;
-            string letters = "-qwertyuiopasdfghjklzxcvbnQWERTYUIOPASDFGHJKLZXCVBNM";
+            string letters = "-.qwertyuiopasdfghjklzxcvbnQWERTYUIOPASDFGHJKLZXCVBNM";
             string digitals = "1234567890";
             for(unsigned int i = 0; i < cmd.size(); i++){
                 tokenS token;
