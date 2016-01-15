@@ -24,7 +24,11 @@ struct comm_str {
     bool isBackground = false;
     bool isChildShell = false;
     int retValue;
+    ///if condition is
     bool isCondition = false;
     string str1; //if condition true
     string str2; //if condition false
+    ///if is `
+    bool isInversedQ = false;
+    vector<tuple<string,comm_str,string>> inversedComm; ///string* `string_parsed` string*
 };

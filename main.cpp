@@ -69,12 +69,25 @@ void run(string cmd){
     string answer;
 
     Parser::parse(cmd, comm);
-    answer = MyExecutor::run(comm);
+    if(comm.isInversedQ){ //there is '`', so we have loop
+        string newCommand;
+        for(std::vector<tuple<string,comm_str,string>>::iterator it = comm.inversedComm.begin(); it != comm.inversedComm.end(); ++it) {
+            newCommand += get<0>(*it);
+            newCommand += MyExecutor::run(get<1>(*it));
+            newCommand += get<2>(*it);
+        }
+        //std::cout.flush(); std::cout << "newCommand ->>> " << newCommand << " <<<----- " << endl;
+        comm = comm_str();
+        Parser::parse(newCommand, comm);
+        answer = MyExecutor::run(comm);
+    }else{ //normal
+        answer = MyExecutor::run(comm);
+    }
 
     Help_class::print_command_vector(comm);
 
     if(comm.isCondition){ //if there was condition
-        cout<<comm.str1.c_str() <<" --------------- "<<comm.str2.c_str()<<endl;
+        //cout<<comm.str1.c_str() <<" --------------- "<<comm.str2.c_str()<<endl;
         if(answer != ""){
             run(comm.str1.c_str());
         }else{

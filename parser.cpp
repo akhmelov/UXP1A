@@ -16,32 +16,44 @@ class Parser {
             return parse(string(line), comm);
         }
 
-        static vector<command_str> parse(string line, comm_str &comm){
+        static vector<command_str> parse(string line, comm_str &comm, bool isSupportSpecial = true){
             vector<command_str> & commands = comm.commands;
 
-            std::cout.flush();
             vector<tokenS> tokens = getTokens(line);
             itS it = tokens.begin();
-            passWhiteTokens(it);
+            itS itBegin = it;
+            comm_str commBegin = comm;
 
             try {
-                itS itBegin = it;
-                bool isParsedCmd = refCmd(it, comm);
-                if(isParsedCmd){
+                bool isParsedSpecial = false;
+                if(isSupportSpecial)
+                    isParsedSpecial = specials(it, comm);
+
+                if(!isParsedSpecial){
+                    comm = commBegin;
+                    it = itBegin;
+
                     passWhiteTokens(it);
-                    if(it->first == 8){ //run background
-                        it++;
-                        comm.isBackground = true;
+
+                    bool isParsedCmd = refCmd(it, comm);
+                    if(isParsedCmd){
                         passWhiteTokens(it);
-                        if(it->first != 0) throw runtime_error("Expected  0 '$' (end of command) but found: " + it->second);
+                        if(it->first == 8){ //run background
+                            it++;
+                            comm.isBackground = true;
+                            passWhiteTokens(it);
+                            if(it->first != 0) throw runtime_error("Expected  0 '$' (end of command) but found: " + it->second);
+                        }
                     }
                 }
             }
             catch (std::exception &e) {
+                std::cout.flush();
                 cout<<"Caught exception: "<<e.what()<<"\n";
             }
 
             /*
+            std::cout.flush();
             for(std::vector<tokenS>::iterator it = tokens.begin(); it != tokens.end(); ++it) {
                 std::cout.flush();
                 int n = ((*it).first);
@@ -231,6 +243,42 @@ class Parser {
                 it++;
             }
             return nameSt;
+        }
+
+        static bool specials(itS &it, comm_str &comm){
+            bool isParsed = false;
+            itS itBegin = it;
+            string textBefore;
+            string textSpecial;
+            string textAfter;
+            while(it->first != 7 && it->first != 0){
+                textBefore += it->second;
+                it++;
+            }
+            if(it->first == 7){
+                it++;
+                isParsed = true;
+                while(it->first != 7 && it->first != 0){
+                    textSpecial += it->second;
+                    it++;
+                }
+                if(it->first != 7) throw runtime_error("Expected 7 (`) but found: " + it->second);
+                it++;
+                while(it->first != 7 && it->first != 0){
+                    textAfter += it->second;
+                    it++;
+                }
+                parse(textSpecial, comm);
+                comm.inversedComm.push_back(tuple<string, comm_str, string>(textBefore, comm, textAfter));
+                if(it->first != 0){
+                    bool isOk = specials(it, comm);
+                    if(!isOk) throw runtime_error("Something went wrong during special ` `, check your command");
+                }
+            }else{
+                it = itBegin; //back iterator
+            }
+            comm.isInversedQ = isParsed;
+            return isParsed;
         }
 
 
