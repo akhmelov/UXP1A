@@ -90,7 +90,6 @@ class Parser {
             nameS nameSt = name(it, comm);
             if(nameSt.first == true){    //found name
                 parameterSt = parameterS(true, nameSt.second);
-                it++;
             }else{ //looking for characters
                 if(it->first == 6){
                     it++;
