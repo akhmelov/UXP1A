@@ -22,6 +22,7 @@ struct comm_str {
     vector<command_str> commands;
     vector<string> redirected;
     bool isBackground;
+    bool isChildShell;
     int retValue;
 
 };

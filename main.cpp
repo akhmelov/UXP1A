@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <vector>
+#include <list>
 #include <regex>
 
 #include <sys/types.h>
