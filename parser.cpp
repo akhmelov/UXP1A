@@ -4,8 +4,9 @@ typedef pair<int, string> tokenS;
 typedef vector<tokenS>::iterator itS;
 typedef pair<bool, vector<tokenS>> resultS;
 
-typedef pair<bool, tokenS> nameS; //<isFound, token>
-typedef tuple<bool, tokenS, int> cmdS; //<isFound, token, whatFound>
+typedef pair<bool, string> nameS; ///<isFound, name>
+typedef pair<bool, string> parameterS; ///<isFound, name>
+typedef pair<bool, command_str> cmdS; ///<isFound, command>
 
 class Parser {
     public:
@@ -25,13 +26,13 @@ class Parser {
                 cout<<"Caught exception: "<<e.what()<<"\n";
             }
 
-            /*
+
             for(std::vector<tokenS>::iterator it = tokens.begin(); it != tokens.end(); ++it) {
                 std::cout.flush();
                 int n = ((*it).first);
                 string name = (*it).second;
                 std::cout << n << " - " + name << endl;
-            }*/
+            }
 
             return commands;
         };
@@ -56,14 +57,63 @@ class Parser {
         }
 
         static void cmd(itS &it, comm_str &comm){
+            cmdS cmdSt(false, command_str());
+            command_str command;
             nameS nameSt = name(it, comm);
-            //if()
+            if(nameSt.first == true){ //found name of command
+                command.name = nameSt.second;
+
+                parameterS parameterSt = parameter(it, comm);
+                while(parameterSt.first == true){ ///TODO PRZEKIEROWANIA
+                    command.args.push_back(parameterSt.second);
+                    parameterSt = parameter(it, comm);
+                }
+                comm.commands.push_back(command);
+            }else{
+                throw runtime_error("Expected name of command but found: " + it->second);
+            }
+        }
+
+        static parameterS parameter(itS &it, comm_str &comm){
+            parameterS parameterSt(false, "");
+            passWhiteTokens(it); //in case of quotation, name has its own
+            nameS nameSt = name(it, comm);
+            if(nameSt.first == true){    //found name
+                parameterSt = parameterS(true, nameSt.second);
+                it++;
+            }else{ //looking for characters
+                if(it->first == 6){
+                    it++;
+                    nameSt = characters(it, comm);
+                    if(it->first != 6)  throw runtime_error("Expected 6 (') but found: " + it->second);
+                    it++;
+                    if(nameSt.first == true){
+                        parameterSt.first = true;
+                        parameterSt.second = "'";
+                        parameterSt.second += nameSt.second;
+                        parameterSt.second += "'";
+                    }
+                }
+            }
+            return parameterSt;
         }
 
         static nameS name(itS &it, comm_str &comm){
-            nameS nameSt(false, tokenS());
+            nameS nameSt(false, "");
+            passWhiteTokens(it);
             if(it->first == 1){
-                nameSt = nameS(true, *it);
+                nameSt = nameS(true, it->second);
+                it++;
+            }
+            return nameSt;
+        }
+
+        static nameS characters(itS &it, comm_str &comm){
+            nameS nameSt(false, "");
+            string str(it->second);
+            while(it->first != 6){ //we copy what ever but not ', because of the end; while not ', we copy everything apart from ', ' it's end
+                nameSt.first = true;
+                nameSt.second += it->second;
                 it++;
             }
             return nameSt;
