@@ -21,7 +21,18 @@ class Parser {
             passWhiteTokens(it);
 
             try {
-                refCmd(it, comm);
+                itS itBegin = it;
+                bool isParsedCmd = refCmd(it, comm);
+                if(isParsedCmd){
+                    passWhiteTokens(it);
+                    if(it->first == 8){ //run background
+                        it++;
+                        comm.isBackground = true;
+                        passWhiteTokens(it);
+                        if(it->first != 0) throw runtime_error("Expected  0 '$' (end of command) but found: " + it->second);
+                    }
+                }
+
             }
             catch (std::exception &e) {
                 cout<<"Caught exception: "<<e.what()<<"\n";
@@ -41,19 +52,22 @@ class Parser {
 
     private:
 
-        static void refCmd(itS &it, comm_str &comm){
+        static bool refCmd(itS &it, comm_str &comm){
+            bool isParse = false;
             tokenS token = *it;
             if(token.first == 3){
                 it++;
-                cmds(it, comm);
+                isParse = cmds(it, comm);
                 if(it->first != 4) throw runtime_error("Expected 4 ')' but found: " + it->second);
                 comm.isChildShell = true;
             }else{
-                cmds(it, comm);
+                isParse = cmds(it, comm);
             }
+            return isParse;
         }
 
-        static void cmds(itS &it, comm_str &comm){
+        ///ret true if parsed command
+        static bool cmds(itS &it, comm_str &comm){
             cmdS cmdSt = cmd(it, comm);
             if(cmdSt.first == true){   //found command, looking for next commands
                 passWhiteTokens(it);
@@ -64,6 +78,7 @@ class Parser {
                     passWhiteTokens(it);
                 }
             }
+            return cmdSt.first;
         }
 
         static cmdS cmd(itS &it, comm_str &comm){
