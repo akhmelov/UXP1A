@@ -53,10 +53,19 @@ class Parser {
         }
 
         static void cmds(itS &it, comm_str &comm){
-            cmd(it, comm);
+            cmdS cmdSt = cmd(it, comm);
+            if(cmdSt.first == true){   //found command, looking for next commands
+                passWhiteTokens(it);
+                while(it->first == 5){
+                    it++;
+                    cmdSt = cmd(it, comm);
+                    if(cmdSt.first == false) throw runtime_error("Expected command but found: " + it->second);
+                    passWhiteTokens(it);
+                }
+            }
         }
 
-        static void cmd(itS &it, comm_str &comm){
+        static cmdS cmd(itS &it, comm_str &comm){
             cmdS cmdSt(false, command_str());
             command_str command;
             nameS nameSt = name(it, comm);
@@ -68,10 +77,11 @@ class Parser {
                     command.args.push_back(parameterSt.second);
                     parameterSt = parameter(it, comm);
                 }
+                cmdSt.first = true;
+                cmdSt.second = command;
                 comm.commands.push_back(command);
-            }else{
-                throw runtime_error("Expected name of command but found: " + it->second);
             }
+            return cmdSt;
         }
 
         static parameterS parameter(itS &it, comm_str &comm){
@@ -125,8 +135,8 @@ class Parser {
                 ++it;
         }
 
-        /*
-        * end (koniec) - 0
+        /**
+        * end (koniec) - 0 ($)
         * litery - 1,
         * liczby - 2,
         * ( - 3, ) - 4, | - 5, ' - 6, ` - 7, & - 8, > - 9, < - 10, ? - 11, : - 12, space - 13
