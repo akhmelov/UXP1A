@@ -56,7 +56,8 @@ class Parser {
         }
 
         static void cmd(itS &it, comm_str &comm){
-            name(it, comm);
+            nameS nameSt = name(it, comm);
+            //if()
         }
 
         static nameS name(itS &it, comm_str &comm){
