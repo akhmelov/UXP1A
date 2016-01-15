@@ -24,5 +24,4 @@ struct comm_str {
     bool isBackground;
     bool isChildShell;
     int retValue;
-
 };

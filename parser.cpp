@@ -6,6 +6,7 @@ typedef pair<bool, vector<tokenS>> resultS;
 
 typedef pair<bool, string> nameS; ///<isFound, name>
 typedef pair<bool, string> parameterS; ///<isFound, name>
+typedef tuple<bool, string, int, bool> redirectionS; ///<isFound, name, what, isInput> what 0 - to file, -1 - pipe, -2 - redirect to another process
 typedef pair<bool, command_str> cmdS; ///<isFound, command>
 
 class Parser {
@@ -26,13 +27,13 @@ class Parser {
                 cout<<"Caught exception: "<<e.what()<<"\n";
             }
 
-
+            /*
             for(std::vector<tokenS>::iterator it = tokens.begin(); it != tokens.end(); ++it) {
                 std::cout.flush();
                 int n = ((*it).first);
                 string name = (*it).second;
                 std::cout << n << " - " + name << endl;
-            }
+            }*/
 
             return commands;
         };
@@ -45,7 +46,7 @@ class Parser {
             if(token.first == 3){
                 it++;
                 cmds(it, comm);
-                if(it->first != 4) throw runtime_error("Expected 4 but found: " + it->second);
+                if(it->first != 4) throw runtime_error("Expected 4 ')' but found: " + it->second);
                 comm.isChildShell = true;
             }else{
                 cmds(it, comm);
@@ -72,11 +73,23 @@ class Parser {
             if(nameSt.first == true){ //found name of command
                 command.name = nameSt.second;
 
-                parameterS parameterSt = parameter(it, comm);
-                while(parameterSt.first == true){ ///TODO PRZEKIEROWANIA
-                    command.args.push_back(parameterSt.second);
-                    parameterSt = parameter(it, comm);
-                }
+                do{ //find parameters or redirections
+                    redirectionS redSt = redirection(it, comm);
+                    if(get<0>(redSt) == true){
+                        if(get<3>(redSt) == true){//input
+                            command.we.push_back(pair<int, string>(get<2>(redSt), get<1>(redSt)));
+                        }else{//outpu
+                            command.wy.push_back(pair<int, string>(get<2>(redSt), get<1>(redSt)));
+                        }
+                    }else{
+                        parameterS parameterSt = parameter(it, comm);
+                        if(parameterSt.first == true){
+                            command.args.push_back(parameterSt.second);
+                        }else{
+                            break;
+                        }
+                    }
+                }while(true);
                 cmdSt.first = true;
                 cmdSt.second = command;
                 comm.commands.push_back(command);
@@ -107,11 +120,41 @@ class Parser {
             return parameterSt;
         }
 
-        static nameS name(itS &it, comm_str &comm){
-            nameS nameSt(false, "");
+        static redirectionS redirection(itS &it, comm_str &comm){
+            redirectionS redSt(false, "", -1, false);
+            itS itBegin = it;
             passWhiteTokens(it);
-            if(it->first == 1){
-                nameSt = nameS(true, it->second);
+            if(it->first == 2){ //there is number at the begining
+                get<2>(redSt) = stoi(it->second);
+                it++;
+            }
+            if(it->first == 9){ //redirect output
+                get<0>(redSt) = true; ///TODO
+                get<3>(redSt) = false;
+                it++;
+                nameS nameSt = name(it, comm);
+                if(nameSt.first == true)
+                    get<1>(redSt) = nameSt.second;
+            }else if(it->first == 10){ // redirect input
+                get<0>(redSt) = true; ///TODO
+                get<3>(redSt) = true;
+                it++;
+                nameS nameSt = name(it, comm);
+                if(nameSt.first == true)
+                    get<1>(redSt) = nameSt.second;
+            }else{ //there is not redirection back iterator
+                it = itBegin;
+            }
+            return redSt;
+        }
+
+        static nameS name(itS &it, comm_str &comm, bool isPassWhite = true){
+            nameS nameSt(false, "");
+            if(isPassWhite)
+                passWhiteTokens(it);
+            while(it->first == 1 || it->first == 2){
+                nameSt.first = true;
+                nameSt.second += it->second;
                 it++;
             }
             return nameSt;

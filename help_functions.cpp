@@ -8,7 +8,7 @@ class Help_class {
 
             std::cout.flush();
             int size1 = commands.size();
-            std::cout << "Size of vector: " + size1 << std::endl;
+            std::cout << " Size of vector: " << size1 << std::endl;
 
 
             for(std::vector<command_str>::iterator it = commands.begin(); it != commands.end(); ++it) {
@@ -19,7 +19,15 @@ class Help_class {
                 for(std::vector<string>::iterator itargs = (*it).args.begin(); itargs != (*it).args.end(); ++itargs) {
                     std::cout.flush();
                     string value = (*itargs);
-                    std::cout <<" -->" + value + "";
+                    std::cout <<" p-->" + value + "";
+                }
+                for(std::vector<pair<int, string>>::iterator itargs = (*it).we.begin(); itargs != (*it).we.end(); ++itargs) {
+                    std::cout.flush();
+                    std::cout <<" ri-->" << itargs->first << "<" << itargs->second;
+                }
+                for(std::vector<pair<int, string>>::iterator itargs = (*it).wy.begin(); itargs != (*it).wy.end(); ++itargs) {
+                    std::cout.flush();
+                    std::cout <<" ro-->" << itargs->first << ">" << itargs->second;
                 }
                 std::cout << "; ";
             }
