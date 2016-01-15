@@ -23,4 +23,5 @@ struct comm_str {
     vector<string> redirected;
     bool isBackground;
     int retValue;
+
 };
