@@ -25,6 +25,8 @@ using namespace std;
 
 #include "help_functions.cpp"
 
+void run(string cmd);
+
 int main(int argc, char ** argv)
 {
     static char line[1024];
@@ -45,12 +47,38 @@ int main(int argc, char ** argv)
 		else if (!fgets(line, 1024, stdin))
 			return 0;
 
-        comm_str comm;
-        Parser::parse(line, comm);
+        run(string(line));
 
-        MyExecutor::run(comm);
+        /*Old solution
+        comm_str comm;
+        string answer;
+
+        Parser::parse(line, comm);
+        answer = MyExecutor::run(comm);
 
         Help_class::print_command_vector(comm);
+        */
+
 	}
 	return 0;
+}
+
+
+void run(string cmd){
+    comm_str comm;
+    string answer;
+
+    Parser::parse(cmd, comm);
+    answer = MyExecutor::run(comm);
+
+    Help_class::print_command_vector(comm);
+
+    if(comm.isCondition){ //if there was condition
+        cout<<comm.str1.c_str() <<" --------------- "<<comm.str2.c_str()<<endl;
+        if(answer != ""){
+            run(comm.str1.c_str());
+        }else{
+            run(comm.str2.c_str());
+        }
+    }
 }

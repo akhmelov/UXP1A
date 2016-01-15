@@ -13,10 +13,14 @@ class Parser {
     public:
 
         static vector<command_str> parse(char line[1024], comm_str &comm){
+            return parse(string(line), comm);
+        }
+
+        static vector<command_str> parse(string line, comm_str &comm){
             vector<command_str> & commands = comm.commands;
 
             std::cout.flush();
-            vector<tokenS> tokens = getTokens(string(line));
+            vector<tokenS> tokens = getTokens(line);
             itS it = tokens.begin();
             passWhiteTokens(it);
 
@@ -32,7 +36,6 @@ class Parser {
                         if(it->first != 0) throw runtime_error("Expected  0 '$' (end of command) but found: " + it->second);
                     }
                 }
-
             }
             catch (std::exception &e) {
                 cout<<"Caught exception: "<<e.what()<<"\n";
@@ -57,11 +60,25 @@ class Parser {
             tokenS token = *it;
             if(token.first == 3){
                 it++;
+                itS itBegin = it;
+                comm_str commBegin = comm;
                 isParse = cmds(it, comm);
+                if(it->first == 11){//condition
+                    it = itBegin; //back iterator
+                    comm = commBegin;
+                    condition(it, comm);
+                }
                 if(it->first != 4) throw runtime_error("Expected 4 ')' but found: " + it->second);
                 comm.isChildShell = true;
             }else{
+                itS itBegin = it;
+                comm_str commBegin = comm;
                 isParse = cmds(it, comm);
+                if(it->first == 11){//condition
+                    it = itBegin; //back iterator
+                    comm = commBegin;
+                    condition(it, comm);
+                }
             }
             return isParse;
         }
@@ -173,6 +190,36 @@ class Parser {
                 it++;
             }
             return nameSt;
+        }
+
+        static bool condition(itS &it, comm_str &comm){
+            passWhiteTokens(it);
+            bool isParse = cmds(it, comm);
+            passWhiteTokens(it);
+            if(it->first == 11){
+                it++;
+                string str1;
+                string str2;
+                while(it->first != 12 && it->first != 0){
+                    str1 += it->second;
+                    it++;
+                }
+                if(it->first == 12){
+                    it++;
+                    while(it->first != 0){
+                        str2 += it->second;
+                        it++;
+                    }
+                }else{
+                    throw runtime_error("Expected : but found: " + it->second);
+                }
+                comm.isCondition = true;
+                comm.str1 = str1;
+                comm.str2 = str2;
+            }else{
+                throw runtime_error("Expected ? but found: " + it->second);
+            }
+            return isParse;
         }
 
         static nameS characters(itS &it, comm_str &comm){

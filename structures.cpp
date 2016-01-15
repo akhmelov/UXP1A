@@ -21,7 +21,10 @@ struct command_str {
 struct comm_str {
     vector<command_str> commands;
     vector<string> redirected;
-    bool isBackground;
-    bool isChildShell;
+    bool isBackground = false;
+    bool isChildShell = false;
     int retValue;
+    bool isCondition = false;
+    string str1; //if condition true
+    string str2; //if condition false
 };
