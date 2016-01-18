@@ -4,18 +4,23 @@ const int ARGS_ARRAY_SIZE = 512;
 static char* args[ARGS_ARRAY_SIZE];
 static char* argsInitCopy[ARGS_ARRAY_SIZE];
 
+string ret; ///returns answer (output of process)
+
 class MyExecutor{
 
     public:
 
         static string run(comm_str &comm){
-            string ret; ///returns answer (output of process)
+
+            ret = "";
             vector<command_str> & commands = comm.commands;
             int n = 0; //how many process are running
 
             int input = 0;
             int first = 1;
             int last = 0;
+
+            stringstream buffer;
 
             for(std::vector<command_str>::iterator it = commands.begin(); it != commands.end(); ++it) {
                 for(int i = 0; i < ARGS_ARRAY_SIZE; i++) //reset array
@@ -32,17 +37,19 @@ class MyExecutor{
                     i++;
                 }
 
-                input = run_command(*it, args, input, first, last);
+                input = run_command(comm, *it, args, input, first, last);
                 n++;
                 first = 0;
             }
 
-            cleanup(n); //wait for end process
+            if(!comm.isBackground)
+                cleanup(comm, n); //wait for end process
+
             return ret;
         }
 
     private:
-        static int run_command(command_str cmd, char* args[512], int input, int first, int last){
+        static int run_command(comm_str &comm, command_str cmd, char* args[512], int input, int first, int last){
             //basic command
             if (cmd.name == "exit")
                 exit(0);
@@ -51,14 +58,13 @@ class MyExecutor{
                     printf("Error occured while changing directory to %s\n", (cmd.args[0].c_str()));
                 }
             }
-            return command(cmd, input, first, last);
+            return command(comm, cmd, input, first, last);
         }
 
-        static int command(command_str cmd, int input, int first, int last)
+        static int command(comm_str &comm, command_str cmd, int input, int first, int last)
         {
-            pid_t pid;
-
             int pipettes[2];
+            pid_t pid;
 
             /* Invoke pipe */
             pipe( pipettes );
@@ -80,10 +86,19 @@ class MyExecutor{
                 } else {
                     // Last command
                     dup2( input, STDIN_FILENO );
+                    if((comm.isInversedQ || comm.isCondition) && !comm.isBackground){
+                        dup2(pipettes[1], 1);  // send stdout to the pipe
+                        //dup2(pipettes[WRITE], STDOUT_FILENO);
+                    }
                 }
 
                 if (execvp(args[0], args) == -1)
                     _exit(EXIT_FAILURE); // If child fails
+
+            }else if((comm.isInversedQ) && !comm.isBackground && last == 1){
+                char buffer[1024];
+                read(pipettes[0], buffer, sizeof(buffer));
+                ret += string(buffer);
             }
 
             if (input != 0)
@@ -99,10 +114,21 @@ class MyExecutor{
             return pipettes[READ];
         }
 
-        static void cleanup(int n)
+        static void cleanup(comm_str &comm, int n)
         {
-            int i;
-            for (i = 0; i < n; ++i)
-                wait(NULL);
+            int statval;
+            if(comm.isCondition)
+                ret = "";
+            for (int i = 0; i < n; ++i){
+                if(comm.isCondition){
+                    wait(&statval);
+                    if(WIFEXITED(statval)){
+                        if(WEXITSTATUS(statval) != 0)
+                            ret += "error";
+                    }
+                }
+                else
+                    wait(NULL);
+            }
         }
 };

@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include <iostream>
 #include <vector>
@@ -49,16 +50,6 @@ int main(int argc, char ** argv)
 
         run(string(line));
 
-        /*Old solution
-        comm_str comm;
-        string answer;
-
-        Parser::parse(line, comm);
-        answer = MyExecutor::run(comm);
-
-        Help_class::print_command_vector(comm);
-        */
-
 	}
 	return 0;
 }
@@ -72,8 +63,10 @@ void run(string cmd){
     if(comm.isInversedQ){ //there is '`', so we have loop
         string newCommand;
         for(std::vector<tuple<string,comm_str,string>>::iterator it = comm.inversedComm.begin(); it != comm.inversedComm.end(); ++it) {
+            comm_str comm1 = get<1>(*it);
+            comm1.isInversedQ = comm.isInversedQ;
             newCommand += get<0>(*it);
-            newCommand += MyExecutor::run(get<1>(*it));
+            newCommand += MyExecutor::run(comm1);
             newCommand += get<2>(*it);
         }
         //std::cout.flush(); std::cout << "newCommand ->>> " << newCommand << " <<<----- " << endl;
@@ -88,7 +81,7 @@ void run(string cmd){
 
     if(comm.isCondition){ //if there was condition
         //cout<<comm.str1.c_str() <<" --------------- "<<comm.str2.c_str()<<endl;
-        if(answer != ""){
+        if(answer == ""){
             run(comm.str1.c_str());
         }else{
             run(comm.str2.c_str());
