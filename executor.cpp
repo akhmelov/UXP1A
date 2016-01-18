@@ -122,10 +122,9 @@ class MyExecutor{
             for (int i = 0; i < n; ++i){
                 if(comm.isCondition){
                     wait(&statval);
-                    if(WIFEXITED(statval)){
+                    if(WIFEXITED(statval))
                         if(WEXITSTATUS(statval) != 0)
                             ret += "error";
-                    }
                 }
                 else
                     wait(NULL);
