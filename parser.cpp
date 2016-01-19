@@ -174,14 +174,18 @@ class Parser {
         }
 
         static redirectionS redirection(itS &it, comm_str &comm){
+            bool isDescritorNumber = false;
             redirectionS redSt(false, "", -1, false);
             itS itBegin = it;
             passWhiteTokens(it);
             if(it->first == 2){ //there is number at the begining
+                isDescritorNumber = true;
                 get<2>(redSt) = stoi(it->second);
                 it++;
             }
             if(it->first == 9){ //redirect output
+                if(!isDescritorNumber)
+                    get<2>(redSt) = 1;
                 get<0>(redSt) = true; ///TODO
                 get<3>(redSt) = false;
                 it++;
@@ -189,6 +193,8 @@ class Parser {
                 if(nameSt.first == true)
                     get<1>(redSt) = nameSt.second;
             }else if(it->first == 10){ // redirect input
+                if(!isDescritorNumber)
+                    get<2>(redSt) = 0;
                 get<0>(redSt) = true; ///TODO
                 get<3>(redSt) = true;
                 it++;

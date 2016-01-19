@@ -91,25 +91,26 @@ class MyExecutor{
                         dup2(pipettes[1], 1);  // send stdout to the pipe
                     }
                 }
-/*
+
                 //redirect < descriptors
                 for(std::vector<pair<int, string>>::iterator it = cmd.we.begin(); it != cmd.we.end(); ++it) {
-                    int out = open((*it).second.c_str(), O_RDWR|O_CREAT|O_APPEND, 0600);
-                    if (-1 == out) { perror(string("opening " + (*it).second).c_str()); return 255; }
-                    dup2((*it).first, out);
-                    cout<<"Redirection: " << (*it).first << "<" << (*it).second<< endl;
+                    int in = open((*it).second.c_str(), O_RDWR|O_CREAT|O_APPEND, 0600);
+                    if (-1 == in) { perror(string("opening " + (*it).second).c_str()); return 255; }
+                    dup2(in, it->first);
                 }
                 //redirect > descriptors
                 for(std::vector<pair<int, string>>::iterator it = cmd.wy.begin(); it != cmd.wy.end(); ++it) {
-                    cout<<"Redirection: "<<it->first<<">"<<it->second<<endl;
+                    int out = open((*it).second.c_str(), O_RDWR|O_CREAT|O_APPEND, 0600);
+                    if (-1 == out) { perror(string("opening " + (*it).second).c_str()); return 255; }
+                    dup2(out, it->first);
                 }
-*/
+
                 if (execvp(args[0], args) == -1)
                     _exit(EXIT_FAILURE); // If child fails
 
             }else if((comm.isInversedQ) && !comm.isBackground && last == 1){
                 char buffer[1024];
-                read(pipettes[0], buffer, sizeof(buffer));
+                read(pipettes[0], buffer, sizeof(buffer)); //read from pipe
                 ret += string(buffer);
             }
 

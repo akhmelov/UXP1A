@@ -44,7 +44,7 @@ int main(int argc, char ** argv)
 		/* Print the command prompt */
 		char cwd[1024];
 		if (getcwd(cwd, sizeof(cwd)) != NULL) {
-			printf("[%d]%s$> ", ++i, cwd);
+			printf("[%d]%s$> ", i++, cwd);
 		} else {
 			printf("$> ");
 		}
