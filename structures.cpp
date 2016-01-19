@@ -22,7 +22,10 @@ struct comm_str {
     vector<command_str> commands;
     vector<string> redirected;
     bool isBackground = false;
+
     bool isChildShell = false;
+    string childCommand; //text between rackets (this text)
+
     int retValue;
     ///if condition is
     bool isCondition = false;

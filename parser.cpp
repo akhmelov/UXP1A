@@ -72,6 +72,7 @@ class Parser {
             tokenS token = *it;
             if(token.first == 3){
                 it++;
+                /* code which parse (something)
                 itS itBegin = it;
                 comm_str commBegin = comm;
                 isParse = cmds(it, comm);
@@ -79,7 +80,15 @@ class Parser {
                     it = itBegin; //back iterator
                     comm = commBegin;
                     condition(it, comm);
+                }*/
+                //not parase (something) just copy
+                string str;
+                while(it->first != 4 && it->first != 0){
+                    str += it->second;
+                    it++;
                 }
+                comm.childCommand = str;
+                //end not parse (something) just copy
                 if(it->first != 4) throw runtime_error("Expected 4 ')' but found: " + it->second);
                 comm.isChildShell = true;
             }else{

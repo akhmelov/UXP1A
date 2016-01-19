@@ -26,26 +26,32 @@ using namespace std;
 
 #include "help_functions.cpp"
 
+string nameOfThisProgram;
 void run(string cmd);
 
 int main(int argc, char ** argv)
 {
     static char line[1024];
+    int i = 0;
+    bool isFirstTimeRun = true;
+
+    nameOfThisProgram = string(argv[0]);
 
     printf("Welcom in %s.\n", argv[0]);
 	printf("SIMPLE SHELL: Type 'exit' or send EOF to exit.\n");
+
 	while (1) {
 		/* Print the command prompt */
 		char cwd[1024];
 		if (getcwd(cwd, sizeof(cwd)) != NULL) {
-			printf("%s$> ", cwd);
+			printf("[%d]%s$> ", ++i, cwd);
 		} else {
 			printf("$> ");
 		}
 		fflush(NULL);
 
 		/* Read a command line */
-        if ( argc > 1) strcpy(line,argv[1]);
+        if ( argc > 1 && isFirstTimeRun){ strcpy(line,argv[1]); isFirstTimeRun = false;}
 		else if (!fgets(line, 1024, stdin))
 			return 0;
 
@@ -74,6 +80,16 @@ void run(string cmd){
         comm = comm_str();
         Parser::parse(newCommand, comm);
         answer = MyExecutor::run(comm);
+    }else if(comm.isChildShell){
+        //prepare new command
+        comm_str comm1;
+        comm1.isBackground = comm.isBackground;
+        command_str cmd;
+        cmd.name = nameOfThisProgram;
+        cmd.args.push_back(comm.childCommand);
+        comm1.commands.push_back(cmd);
+
+        answer = MyExecutor::run(comm1);
     }else{ //normal
         answer = MyExecutor::run(comm);
     }
