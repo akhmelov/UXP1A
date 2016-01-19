@@ -94,7 +94,7 @@ void run(string cmd){
         answer = MyExecutor::run(comm);
     }
 
-    Help_class::print_command_vector(comm);
+    //Help_class::print_command_vector(comm);
 
     if(comm.isCondition){ //if there was condition
         //cout<<comm.str1.c_str() <<" --------------- "<<comm.str2.c_str()<<endl;
