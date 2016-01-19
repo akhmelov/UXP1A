@@ -32,6 +32,7 @@ int main(int argc, char ** argv)
 {
     static char line[1024];
 
+    printf("Welcom in %s.\n", argv[0]);
 	printf("SIMPLE SHELL: Type 'exit' or send EOF to exit.\n");
 	while (1) {
 		/* Print the command prompt */
